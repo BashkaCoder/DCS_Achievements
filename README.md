@@ -1,4 +1,5 @@
 <details><summary>Achievement #1 — «Параллельный таймер» (AVR Assembler).</summary>
+  
 ## Платформа
 - МК: **ATmega8**
 - Частота: **16 МГц**
