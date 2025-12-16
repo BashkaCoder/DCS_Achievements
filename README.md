@@ -77,11 +77,12 @@
 
 ## Описание
 
-Проект реализует классическую линейную 3-х уровневую архитектуру:
+Проект реализует классическую линейную трёхуровневую архитектуру:
 
-[КЛИЕНТ] ↔ [ВЕБ-СЕРВЕР] ↔ [СЕРВЕР ПРИЛОЖЕНИЙ] ↔ [БАЗА ДАННЫХ]
+Клиент → Веб-сервер → Сервер приложений → База данных
 
-Система принимает HTTP POST запрос с натуральным числом и возвращает число, увеличенное на единицу.
+Система принимает HTTP POST-запрос с неотрицательным целым числом `n`
+и возвращает значение, увеличенное на единицу.
 
 ---
 
@@ -89,69 +90,88 @@
 
 ### POST /increment
 
-Request:
+Тело запроса:
 {
-  "number": 5
+  "n": <int>
 }
 
-Response (200 OK):
+Успешный ответ (200 OK):
 {
-  "received": 5,
-  "result": 6
+  "received": n,
+  "result": n + 1
 }
 
 ---
 
-## Исключительные ситуации
+## Обработка ошибок
 
-### 1. Дубликат числа
+### Дубликат числа
 
-Если число уже поступало ранее.
+Возвращается, если число `n` уже было обработано ранее.
 
-Response:
-409 Conflict
+Код ответа: 409 Conflict
 
 {
   "error": "duplicate",
-  "number": 5,
-  "last_processed": 5
+  "n": n,
+  "last_processed": L
 }
 
 ---
 
-### 2. Нарушение последовательности
+### Нарушение последовательности (-1)
 
-Если число равно last_processed - 1.
+Возвращается, если `n == last_processed - 1`.
 
-Response:
-400 Bad Request
+Код ответа: 409 Conflict
 
 {
-  "error": "sequence_violation",
-  "number": 4,
-  "last_processed": 5
+  "error": "out_of_order_minus_one",
+  "n": n,
+  "last_processed": L
 }
 
 Все ошибки логируются в базе данных.
 
 ---
 
+## Проверка состояния сервиса
+
+### GET /health
+
+Ответ:
+{
+  "status": "ok"
+}
+
+---
+
 ## Хранение данных
 
-Используется SQLite.
+Используется база данных SQLite.
 
 Таблицы:
-- processed_numbers(number)
-- state(last_processed)
-- log(ts, error_code, number, last_processed, message)
+- state (last_processed)
+- seen (n)
+- error_log (timestamp, error_code, n, last_processed, message)
 
 ---
 
 ## Запуск
 
+python3 -m venv .venv
+source .venv/bin/activate
 pip install flask
 python app.py
 
-Сервер будет доступен на http://localhost:8000
+Сервер будет доступен по адресу:
+http://localhost:8000
+
+---
+
+## UML
+
+Диаграмма компонентов и диаграмма последовательностей
+предоставлены отдельно.
 
 ---
