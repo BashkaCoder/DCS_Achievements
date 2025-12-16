@@ -1,0 +1,40 @@
+@startuml
+title Component Diagram — Линейная 3-х уровневая архитектура
+skinparam componentStyle rectangle
+
+component "Клиент" as Client {
+    component "HTTP Client" as HttpClient
+}
+
+component "Веб-сервер" as WebServer {
+    component "Reverse Proxy\n(Nginx / Apache)" as Proxy
+    interface "HTTP POST /increment" as HttpAPI
+}
+
+component "Сервер приложений" as AppServer {
+    component "IncrementController" as Controller
+    component "NumberProcessingService" as Service
+    component "ProcessedNumberRepository" as Repository
+    component "LoggingService" as Logger
+}
+
+database "База данных" as DB {
+    component "processed_numbers" as NumbersTable
+    component "log" as LogTable
+}
+
+' --- Связи ---
+HttpClient --> HttpAPI : HTTP POST { number }
+
+Proxy --> Controller : Forward request
+Controller --> Service : increment(number)
+
+Service --> Repository : check / save
+Service --> Logger : log errors
+
+Repository --> NumbersTable : SELECT / INSERT
+Logger --> LogTable : INSERT log record
+
+Controller --> HttpClient : HTTP Response
+
+@enduml

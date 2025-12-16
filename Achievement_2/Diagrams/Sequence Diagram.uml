@@ -1,0 +1,32 @@
+@startuml
+title Sequence Diagram — Обработка POST /increment
+
+actor Client
+participant "WebServer" as Web
+participant "AppServer" as App
+database DB
+
+Client -> Web : POST /increment\n{ number = N }
+Web -> App : forward(number)
+
+App -> DB : SELECT MAX(number)\nFROM processed_numbers
+DB --> App : last_number
+
+alt number == last_number
+    App -> DB : INSERT INTO log\n(type=DUPLICATE, number)
+    DB --> App : OK
+    App --> Web : 409 Conflict\n"Number already processed"
+    Web --> Client : 409 Error
+else number == last_number - 1
+    App -> DB : INSERT INTO log\n(type=SEQUENCE_VIOLATION, number)
+    DB --> App : OK
+    App --> Web : 400 Bad Request\n"Sequence violation"
+    Web --> Client : 400 Error
+else number > last_number
+    App -> DB : INSERT INTO processed_numbers(number)
+    DB --> App : OK
+    App --> Web : 200 OK\nresult = number + 1
+    Web --> Client : 200 OK\n{ result = N + 1 }
+end
+
+@enduml
