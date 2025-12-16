@@ -71,3 +71,87 @@
 Реализована параллельная работа двух таймеров ATmega8 с выводом данных через USART.  
 Задание стандартной и средней сложности выполнено.
 </details>
+
+
+<details><summary> Achievement #2 — Линейная клиент-серверная архитектура. </summary>
+
+## Описание
+
+Проект реализует классическую линейную 3-х уровневую архитектуру:
+
+[КЛИЕНТ] ↔ [ВЕБ-СЕРВЕР] ↔ [СЕРВЕР ПРИЛОЖЕНИЙ] ↔ [БАЗА ДАННЫХ]
+
+Система принимает HTTP POST запрос с натуральным числом и возвращает число, увеличенное на единицу.
+
+---
+
+## API
+
+### POST /increment
+
+Request:
+{
+  "number": 5
+}
+
+Response (200 OK):
+{
+  "received": 5,
+  "result": 6
+}
+
+---
+
+## Исключительные ситуации
+
+### 1. Дубликат числа
+
+Если число уже поступало ранее.
+
+Response:
+409 Conflict
+
+{
+  "error": "duplicate",
+  "number": 5,
+  "last_processed": 5
+}
+
+---
+
+### 2. Нарушение последовательности
+
+Если число равно last_processed - 1.
+
+Response:
+400 Bad Request
+
+{
+  "error": "sequence_violation",
+  "number": 4,
+  "last_processed": 5
+}
+
+Все ошибки логируются в базе данных.
+
+---
+
+## Хранение данных
+
+Используется SQLite.
+
+Таблицы:
+- processed_numbers(number)
+- state(last_processed)
+- log(ts, error_code, number, last_processed, message)
+
+---
+
+## Запуск
+
+pip install flask
+python app.py
+
+Сервер будет доступен на http://localhost:8000
+
+---
