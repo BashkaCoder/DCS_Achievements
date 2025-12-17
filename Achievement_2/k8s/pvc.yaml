@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: increment-db-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-hostpath
+  volumeName: ns-04-increment-db-pv
+  resources:
+    requests:
+      storage: 256Mi

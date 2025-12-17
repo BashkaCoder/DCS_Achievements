@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ns-04-increment-db-pv
+spec:
+  capacity:
+    storage: 256Mi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-hostpath
+  hostPath:
+    path: /var/lib/ns-04-increment-db
+    type: DirectoryOrCreate
